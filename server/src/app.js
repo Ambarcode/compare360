@@ -2,7 +2,10 @@ const express = require('express'); //returns function
 const app = express(); //returns handler objects
 require('../DB-Connect/db')
 const Shirts = require('../models/shirts');
-   
+const Jeans = require('../models/jeans');
+const Shoes=require('../models/shoes');
+const Phone=require('../models/phone');
+
 app.use(express.json()); 
 
 app.get('/shirts',async (req,res)=>{ 
@@ -17,6 +20,39 @@ catch(err){
     console.log(err);
 }
     
+})
+
+app.get('/jeans' , async (req,res)=>{
+    try{
+        let data=await Jeans.find();
+        res.send(data);
+    }
+    catch(err){
+        console.log(err);
+    }
+})
+
+app.get('/shoes',async (req,res)=>{ 
+    try{   
+    
+        let data = await Shoes.find();
+        res.send(data);
+    
+    }
+    catch(err){ 
+        
+        console.log(err);
+    }
+});
+
+app.get('/phones' , async (req,res)=>{
+    try{
+        let data=await Phone.find();
+        res.send(data);
+    }
+    catch(err){
+        console.log(err);
+    }
 })
  
 app.post("/signup",(req,res)=>{                
