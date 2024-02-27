@@ -1,5 +1,9 @@
 const mongoose =require('mongoose');
-const bcrypt =require("bcryptjs")
+const bcrypt =require("bcryptjs");
+const jwt=require('jsonwebtoken');
+
+
+
 const userSchema= new mongoose.Schema({
 
     name:{
@@ -24,7 +28,12 @@ const userSchema= new mongoose.Schema({
         color: {
             type: String,
         }
-    }]
+    }],
+    tokens:[
+        {
+            type: String
+        }
+    ]
 })
    
     userSchema.methods.passwordEncrypt= async function(){
@@ -41,6 +50,22 @@ const userSchema= new mongoose.Schema({
             return false;
         }
     }
+
+    userSchema.methods.generateToken= async function(){
+        try{
+            
+            const token=jwt.sign({id:this._id}, "THISISMYSECRETKEY")
+            this.tokens=this.tokens.concat(token);
+            await this.save();
+            return token;
+
+        }catch(err){
+            console.log(err);
+            return false;
+            
+        }
+    }
+    
 
 
   
