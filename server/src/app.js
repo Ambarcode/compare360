@@ -7,16 +7,22 @@ const Shoes=require('../models/shoes');
 const Phone=require('../models/phone');
 const User = require('../models/userSchema')
 const bcrypt = require('bcryptjs')
+const cookieParser = require("cookie-parser");
+const authenticate = require('../Middleware/authenticate.js');
 
 
-app.use(express.json());  
+app.use(cookieParser());
+app.use(express.json()); //to activate middleware  
+
+
 app.get('/shirts',async (req,res)=>{ 
 try{   
-    let data = await Shirts.find();
+    let data = await Shirts.find({name:"Ketch"});
     res.send(data);
 }
 catch(err){ 
     console.log(err);
+    return res.status(400).send("Server Error");
 }   
 })
 
@@ -89,14 +95,15 @@ app.post('/signup' , async (req,res)=>{
     
 })
 
+//we'll create login route , we'll also generate token
 app.get('/login',async (req,res)=>{
     try{
 
     
-    let {email,password} = req.body;
+    let {email,password} = req.body ;   
     
 
-
+ 
     let user = await User.findOne({email})
     
 
@@ -107,8 +114,22 @@ app.get('/login',async (req,res)=>{
         
         let check = await bcrypt.compare(password,user.password);
         if(check)
-        {
-            return res.status(200).json(user);
+        { 
+            let token = user.generateToken();
+            if(token) {
+
+                res.cookie('jwtoken', token,
+                {
+
+                    expires: new Date(Date.now() + 25892000000),
+                    httpOnly:true
+                    //dafaulty it runs on https, as we are working with http not https
+
+                });
+            return res.status(200).json(user); 
+            }
+            
+            return res.status(404).send("Server Error");
         }
         else{
             return res.status(401).send("Invalid Credentials");
@@ -122,6 +143,14 @@ catch(err)
     console.log(err);
     return res.status(400).send("Server Error")
 }
+
+})
+   
+
+app.get('/loggedin',authenticate,async (req,res)=>{
+
+    console.log("done")
+
 
 })
 
